@@ -1,0 +1,62 @@
+﻿@page "/"
+@using cs_pokedex.Data
+@using cs_pokedex.Services
+
+@inject AppState appState
+@inject IPokemonRepository pokemonRepository
+@rendermode InteractiveServer
+
+<div class="container-fluid">
+
+    <PageTitle>Home</PageTitle>
+
+    <PokemonSelectScreen OnPokemonSelected="@OnPokemonSelectedFromChild" />
+    <hr />
+    <PokedexEntry @ref="pokedexEntry" />
+</div>
+
+@code {
+    private PokedexEntry? pokedexEntry;
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Pokemon? bulbasaur = await pokemonRepository.GetByIdAsync(1);
+
+        if (bulbasaur == null)
+        {
+            List<string[]> pokemons = Pokedex.GetNationalDex();
+
+            foreach (var pokemon in pokemons)
+            {
+                Pokemon dbPokemon = new();
+                dbPokemon.NationalDexNumber = Convert.ToInt32(pokemon[0]);
+                dbPokemon.Name = pokemon[1];
+                await pokemonRepository.AddAsync(dbPokemon);
+            }
+        }
+
+        appState.AddStateChangeListeners(OnPokemonSelected);
+    }
+
+    private void OnPokemonSelected()
+    {
+        Console.WriteLine($"Selected Pokémon (via AppState): {appState.SelectedPokemon}");
+        InvokeAsync(StateHasChanged);
+    }
+
+    // optional: handler für das EventCallback des Kindes
+    private void OnPokemonSelectedFromChild(string pokemon)
+    {
+        Console.WriteLine($"Selected Pokémon (from child callback): {pokemon}");
+        InvokeAsync(StateHasChanged);
+        pokedexEntry?.RefreshMe();
+
+        // appState wurde im Child gesetzt; die Broadcast-Funktion sorgt für UI-Update
+    }
+
+    public void Dispose()
+    {
+        appState.RemoveStateChangeListeners(OnPokemonSelected);
+    }
+}

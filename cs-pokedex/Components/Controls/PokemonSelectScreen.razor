@@ -1,0 +1,109 @@
+﻿@using cs_pokedex.Utilities
+@using cs_pokedex.Services
+
+@inject AppState appState
+@inject IPokemonRepository pokemonRepository
+
+<h3>PokemonSelectScreen</h3>
+
+@code {
+    private List<string[]> pokemons = Pokedex.GetNationalDex();
+
+    [Parameter]
+    public EventCallback<string> OnPokemonSelected { get; set; }
+
+    private async Task SelectPokemon(ChangeEventArgs e)
+    {
+        var value = e?.Value?.ToString() ?? string.Empty;
+        Console.WriteLine($"Selected Pokémon: {value}");
+
+        if (string.IsNullOrEmpty(value))
+        {
+            appState.SelectedNationalDexNumber = 0;
+            appState.SelectedPokemon = null;
+            await OnPokemonSelected.InvokeAsync(value);
+            return;
+        }
+
+        appState.SelectedNationalDexNumber = Int32.Parse(value);
+        PokeApiClient pokeApiClient = new(pokemonRepository);
+        appState.SelectedPokemon = await pokeApiClient.GetPokemonByNationalDexNumberAsync(appState.SelectedNationalDexNumber);
+        await OnPokemonSelected.InvokeAsync(value);
+    }
+
+    private void changeRegion(ChangeEventArgs e)
+    {
+        switchRegion(e?.Value?.ToString() ?? "National");
+    }
+
+    private void switchRegion(String region)
+    {
+        switch (region)
+        {
+            case "National":
+                appState.SelectedRegion = "National";
+                pokemons = Pokedex.GetNationalDex();
+                break;
+            case "Kanto":
+                appState.SelectedRegion = "Kanto";
+                pokemons = Pokedex.kantoDex();
+                break;
+            case "Johto":
+                appState.SelectedRegion = "Johto";
+                pokemons = Pokedex.johtoDex();
+                break;
+            case "Hoenn":
+                appState.SelectedRegion = "Hoenn";
+                pokemons = Pokedex.hoennDex();
+                break;
+            case "Sinnoh":
+                appState.SelectedRegion = "Sinnoh";
+                pokemons = Pokedex.sinnohDex();
+                break;
+            case "Unova":
+                appState.SelectedRegion = "Unova";
+                pokemons = Pokedex.unovaDex();
+                break;
+            case "Kalos":
+                appState.SelectedRegion = "Kalos";
+                pokemons = Pokedex.kalosDex();
+                break;
+            case "Alola":
+                appState.SelectedRegion = "Alola";
+                pokemons = Pokedex.alolaDex();
+                break;
+            case "Galar":
+                appState.SelectedRegion = "Galar";
+                pokemons = Pokedex.galarDex();
+                break;
+            default:
+                appState.SelectedRegion = "National";
+                pokemons = Pokedex.GetNationalDex();
+                break;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("PokemonSelectScreen initialized.");
+        switchRegion(appState.SelectedRegion);
+    }
+}
+
+<label for="region">Region</label>
+<select id="region" @onchange="changeRegion">
+    @foreach (var region in Pokedex.Regions)
+    {
+        <option>@region</option>
+    }
+</select>
+
+<label for="pokemon">Pokemon</label>
+<select id="pokemon" @onchange="SelectPokemon">
+    <option value="">Select a Pokémon</option>
+    @foreach (var pokemon in pokemons)
+    {
+        <!-- value ist jetzt der Anzeigename (pokemon[1]) – damit appState und UI übereinstimmen -->
+        <option value="@pokemon[0]" selected="@(Int32.Parse(pokemon[0]) == appState.SelectedNationalDexNumber)">@pokemon[1]</option>
+    }
+</select>

@@ -1,0 +1,167 @@
+﻿@using cs_pokedex.Data
+@inject AppState appState
+
+
+@if (appState.SelectedPokemon != null)
+{
+        <h3>PokedexEntry</h3>
+        <table class="table table-striped table-bordered table-hover table-condensed table-responsive w-50 align-content-start">
+            <tbody>
+                <tr>
+                    <th>National Dex</th>
+                    <td>@appState.SelectedPokemon.NationalDexNumber</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>@appState.SelectedPokemon.Name</td>
+                </tr>
+                <tr>
+                    <th>Typ</th>
+                    <td>@appState.SelectedPokemon.Type1 @(appState.SelectedPokemon.Type2 != String.Empty ? "/" + appState.SelectedPokemon.Type2 : String.Empty)</td>
+                </tr>
+                <tr>
+                    <th>Base Experience</th>
+                    <td>@appState.SelectedPokemon.BaseExperience</td>
+                </tr>
+                <tr>
+                    <th>Height</th>
+                    <td>@appState.SelectedPokemon.Height</td>
+                </tr>
+                <tr>
+                    <th>Weight</th>
+                    <td>@appState.SelectedPokemon.Weight</td>
+                </tr>
+                <tr>
+                    <th>HP</th>
+                    <td>@appState.SelectedPokemon.HP</td>
+                </tr>
+                <tr>
+                    <th>Attack</th>
+                    <td>@appState.SelectedPokemon.Attack</td>
+                </tr>
+                <tr>
+                    <th>Defense</th>
+                    <td>@appState.SelectedPokemon.Defense</td>
+                </tr>
+                <tr>
+                    <th>Special Attack</th>
+                    <td>@appState.SelectedPokemon.SpecialAttack</td>
+                </tr>
+                <tr>
+                    <th>Special Defense</th>
+                    <td>@appState.SelectedPokemon.SpecialDefense</td>
+                </tr>
+                <tr>
+                    <th>Speed</th>
+                    <td>@appState.SelectedPokemon.Speed</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Abilities</h4>
+        <table class="table table-striped table-bordered table-hover table-condensed table-responsive align-content-start">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Short</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (PokemonAbility ability in appState.SelectedPokemon.Abilities)
+            {
+                <tr>
+                    <td>@ability.Name</td>
+                    <td>@ability.ShortDescription</td>
+                    <td>@ability.Description</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+    <h4>Cries</h4>
+    <table class="table table-striped table-bordered table-hover table-condensed table-responsive align-content-start">
+        <thead>
+            <tr>
+                <th>Original</th>
+                <th>Latest</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PokemonCry cry in appState.SelectedPokemon.Cries)
+            {
+                <tr>
+                    <td>
+                        <audio controls>
+                            <source src="@cry.OriginalUrl" type="audio/ogg">
+                        </audio>
+                    </td>
+                    <td>
+                        <audio controls>
+                            <source src="@cry.LatestUrl" type="audio/ogg">
+                        </audio>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Locations</h4>
+    <table class="table table-striped table-bordered table-hover table-condensed table-responsive align-content-start">
+        <thead>
+            <tr>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PokemonLocation location in appState.SelectedPokemon.Locations)
+            {
+                <tr>
+                    <td>@location.LocationName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Sprites</h4>
+    <table class="table table-striped table-bordered table-hover table-condensed table-responsive align-content-start w-50">
+        <tbody>
+            @for(var i = 0; i < appState.SelectedPokemon.Sprites.Count; i++) {
+                PokemonSprite sprite = appState.SelectedPokemon.Sprites[i];
+                <tr>
+                    <th>@sprite.SpriteType</th>
+                    <td>
+                        <img src="@sprite.SpriteUrl" height="48px" width="48px" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Moves</h4>
+    <table class="table table-striped table-bordered table-hover table-condensed table-responsive align-content-start">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Power</th>
+                <th>Accuracy</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PokemonMove move in appState.SelectedPokemon.Moves)
+            {
+                <tr>
+                    <td>@move.MoveName</td>
+                    <td>@move.Power</td>
+                    <td>@move.Accuracy</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    public void RefreshMe()
+    {
+        StateHasChanged();
+    }
+}
